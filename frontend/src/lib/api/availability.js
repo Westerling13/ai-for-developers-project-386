@@ -1,4 +1,4 @@
-import { get as httpGet, post, put, delete as del } from './client.js';
+import { get as httpGet, post, put, remove } from './client.js';
 
 /**
  * @typedef {import('../types/api.js').AvailabilityRule} AvailabilityRule
@@ -47,7 +47,7 @@ export function updateRule(id, data) {
  * @returns {Promise<{message: string}>}
  */
 export function deleteRule(id) {
-  return del(`/availability/rules/${id}`);
+  return remove(`/availability/rules/${id}`);
 }
 
 // Exceptions
@@ -81,7 +81,7 @@ export function createException(data) {
  * @returns {Promise<{message: string}>}
  */
 export function deleteException(id) {
-  return del(`/availability/exceptions/${id}`);
+  return remove(`/availability/exceptions/${id}`);
 }
 
 export default {

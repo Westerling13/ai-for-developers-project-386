@@ -1,4 +1,4 @@
-import { get as httpGet, post, put, delete as del } from './client.js';
+import { get as httpGet, post, put, remove } from './client.js';
 
 /**
  * @typedef {import('../types/api.js').MeetingType} MeetingType
@@ -61,8 +61,8 @@ export function update(id, data) {
  * @param {number} id
  * @returns {Promise<{message: string}>}
  */
-export function remove(id) {
-  return del(`/meeting-types/${id}`);
+export function removeType(id) {
+  return remove(`/meeting-types/${id}`);
 }
 
 export default {
@@ -71,5 +71,5 @@ export default {
   getById,
   create,
   update,
-  remove,
+  remove: removeType,
 };
