@@ -657,7 +657,7 @@ interface TimeSlotController {
   @doc("Получить доступные слоты для бронирования (гость)")
   getAvailable(
     @path calendarId: UUID,
-    @query params: TimeSlotQuery
+    ...TimeSlotQuery
   ): TimeSlotsByDate[] | ErrorResponse;
 
   @get
@@ -683,7 +683,7 @@ interface MeetingController {
   @get
   @doc("Получить список встреч календаря (владелец)")
   @useAuth(BearerAuth)
-  list(@query params: MeetingQuery): PaginatedResponse<MeetingListItem> | ErrorResponse;
+  list(...MeetingQuery): PaginatedResponse<MeetingListItem> | ErrorResponse;
 
   @get
   @route("/{id}")

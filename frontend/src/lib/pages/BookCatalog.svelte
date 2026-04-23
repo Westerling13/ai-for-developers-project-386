@@ -66,7 +66,7 @@
     {:else}
       <div class="meeting-types-grid">
         {#each meetingTypes as type (type.id)}
-          <Card hoverable on:click={() => selectMeetingType(type)}>
+          <Card hoverable onclick={() => selectMeetingType(type)}>
             <div class="meeting-type-card">
               <div class="meeting-type-header">
                 <h3>{type.name}</h3>

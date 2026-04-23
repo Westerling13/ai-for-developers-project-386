@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    container_name: django-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/db.sqlite3:/app/db.sqlite3
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8000/admin/login/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    container_name: svelte-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  prism:
+    image: stoplight/prism:5
+    command: mock -h 0.0.0.0 --multiprocess=false /tmp/openapi.yaml
+    ports:
+      - "4010:4010"
+    container_name: prism-mock
+    restart: unless-stopped
+    volumes:
+      - ./docs/tsp-output/@typespec/openapi3/openapi.yaml:/tmp/openapi.yaml:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:4010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

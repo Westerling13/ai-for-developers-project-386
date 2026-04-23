@@ -4,19 +4,21 @@
    * @property {boolean} [hoverable=false]
    * @property {string} [padding='lg'] - 'sm' | 'md' | 'lg'
    * @property {import('svelte').Snippet} [children]
+   * @property {() => void} [onclick]
    */
 
   /** @type {Props} */
   let {
     hoverable = false,
     padding = 'lg',
-    children
+    children,
+    onclick
   } = $props();
 
   const paddingClass = $derived(`card-padding-${padding}`);
 </script>
 
-<div class="card {paddingClass}" class:hoverable>
+<div class="card {paddingClass}" class:hoverable {onclick} role={onclick ? 'button' : undefined} tabindex={onclick ? 0 : undefined}>
   {@render children?.()}
 </div>
 

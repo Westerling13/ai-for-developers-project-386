@@ -1,9 +1,9 @@
 /* CSS Variables based on Design System */
 :root {
   /* Colors */
-  --color-primary: #FF6B35;
-  --color-primary-hover: #E55A2B;
-  --color-primary-light: rgba(255, 107, 53, 0.1);
+  --color-primary: #9B7ED9;
+  --color-primary-hover: #7B62B9;
+  --color-primary-light: rgba(155, 126, 217, 0.1);
   
   --color-background: #F8F9FA;
   --color-surface: #FFFFFF;
@@ -60,7 +60,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-primary: 0 2px 4px rgba(255, 107, 53, 0.2);
+  --shadow-primary: 0 2px 4px rgba(155, 126, 217, 0.2);
   
   /* Transitions */
   --transition-fast: 0.15s ease;

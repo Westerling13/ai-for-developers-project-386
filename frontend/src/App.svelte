@@ -69,7 +69,11 @@
   <Header />
   
   <main>
-    <page {navigate} />
+    {#if page}
+      {#key currentPath}
+        <svelte:component this={page} {navigate} />
+      {/key}
+    {/if}
   </main>
   
   <Toast />

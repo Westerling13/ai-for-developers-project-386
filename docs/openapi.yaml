@@ -1,0 +1,1754 @@
+openapi: 3.0.0
+info:
+  title: Meeting Booking Calendar API
+  version: 0.0.0
+tags:
+  - name: Authentication
+  - name: Owner
+  - name: Calendar
+  - name: Meeting Types
+  - name: Availability
+  - name: Time Slots
+  - name: Meetings
+paths:
+  /auth/login:
+    post:
+      operationId: AuthController_login
+      description: Вход в систему (только для владельца)
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/AuthToken'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+  /auth/logout:
+    post:
+      operationId: AuthController_logout
+      description: Выход из системы
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+  /auth/register:
+    post:
+      operationId: AuthController_register
+      description: Регистрация владельца календаря
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Owner'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnerRegistration'
+  /availability/exceptions:
+    get:
+      operationId: AvailabilityController_getExceptions
+      description: Получить исключения доступности
+      parameters:
+        - name: calendarId
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+          explode: false
+        - name: from
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/Date'
+          explode: false
+        - name: to
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/Date'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/AvailabilityException'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Availability
+      security:
+        - BearerAuth: []
+    post:
+      operationId: AvailabilityController_createException
+      description: Создать исключение доступности (например, отпуск)
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/AvailabilityException'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Availability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityExceptionCreate'
+      security:
+        - BearerAuth: []
+  /availability/exceptions/{id}:
+    delete:
+      operationId: AvailabilityController_deleteException
+      description: Удалить исключение доступности
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Availability
+      security:
+        - BearerAuth: []
+  /availability/rules:
+    get:
+      operationId: AvailabilityController_getRules
+      description: Получить правила доступности календаря
+      parameters:
+        - name: calendarId
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/AvailabilityRule'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Availability
+      security:
+        - BearerAuth: []
+    post:
+      operationId: AvailabilityController_createRule
+      description: Создать правило доступности
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/AvailabilityRule'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Availability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityRuleCreate'
+      security:
+        - BearerAuth: []
+  /availability/rules/{id}:
+    put:
+      operationId: AvailabilityController_updateRule
+      description: Обновить правило доступности
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/AvailabilityRule'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Availability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityRuleCreate'
+      security:
+        - BearerAuth: []
+    delete:
+      operationId: AvailabilityController_deleteRule
+      description: Удалить правило доступности
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Availability
+      security:
+        - BearerAuth: []
+  /calendars/my:
+    get:
+      operationId: CalendarController_getMyCalendar
+      description: Получить календарь текущего владельца (единственный)
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Calendar'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Calendar
+      security:
+        - BearerAuth: []
+    put:
+      operationId: CalendarController_updateMyCalendar
+      description: Обновить настройки календаря
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Calendar'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Calendar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                timezone:
+                  type: string
+                color:
+                  $ref: '#/components/schemas/HexColor'
+                minBookingNoticeMinutes:
+                  type: integer
+                  format: int32
+                maxBookingDaysAhead:
+                  type: integer
+                  format: int32
+      security:
+        - BearerAuth: []
+  /meeting-types:
+    get:
+      operationId: MeetingTypeController_list
+      description: Получить все типы встреч календаря (владелец)
+      parameters:
+        - name: calendarId
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/MeetingType'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meeting Types
+      security:
+        - BearerAuth: []
+    post:
+      operationId: MeetingTypeController_create
+      description: Создать тип встречи (владелец)
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/MeetingType'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meeting Types
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingTypeCreate'
+      security:
+        - BearerAuth: []
+  /meeting-types/public/{calendarId}:
+    get:
+      operationId: MeetingTypeController_listPublic
+      description: Получить публичный список типов встреч (гость)
+      parameters:
+        - name: calendarId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MeetingTypePublicView'
+      tags:
+        - Meeting Types
+  /meeting-types/{id}:
+    get:
+      operationId: MeetingTypeController_get
+      description: Получить тип встречи по ID (владелец)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/MeetingType'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meeting Types
+      security:
+        - BearerAuth: []
+    put:
+      operationId: MeetingTypeController_update
+      description: Обновить тип встречи (владелец)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/MeetingType'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meeting Types
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingTypeUpdate'
+      security:
+        - BearerAuth: []
+    delete:
+      operationId: MeetingTypeController_delete
+      description: Удалить тип встречи (владелец)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meeting Types
+      security:
+        - BearerAuth: []
+  /meetings:
+    get:
+      operationId: MeetingController_list
+      description: Получить список встреч календаря (владелец)
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Фильтр по статусу
+          schema:
+            $ref: '#/components/schemas/MeetingStatus'
+          explode: false
+        - name: fromDate
+          in: query
+          required: false
+          description: Встречи от этой даты
+          schema:
+            $ref: '#/components/schemas/Date'
+          explode: false
+        - name: toDate
+          in: query
+          required: false
+          description: Встречи до этой даты
+          schema:
+            $ref: '#/components/schemas/Date'
+          explode: false
+        - name: sort
+          in: query
+          required: false
+          description: 'Сортировка: asc (ближайшие) или desc (далекие)'
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: asc
+          explode: false
+        - name: page
+          in: query
+          required: false
+          description: Номер страницы (начиная с 1)
+          schema:
+            type: integer
+            format: int32
+            default: 1
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          description: Количество элементов на странице
+          schema:
+            type: integer
+            format: int32
+            default: 20
+          explode: false
+        - name: params
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/MeetingQuery'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    required:
+                      - data
+                      - meta
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MeetingListItem'
+                      meta:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            format: int32
+                          page:
+                            type: integer
+                            format: int32
+                          limit:
+                            type: integer
+                            format: int32
+                          totalPages:
+                            type: integer
+                            format: int32
+                        required:
+                          - total
+                          - page
+                          - limit
+                          - totalPages
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meetings
+      security:
+        - BearerAuth: []
+  /meetings/book:
+    post:
+      operationId: MeetingController_book
+      description: Создать бронирование (гость, без авторизации)
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Meeting'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meetings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingCreate'
+  /meetings/confirmation/{id}:
+    get:
+      operationId: MeetingController_getConfirmation
+      description: Получить подтверждение бронирования по ID (гость)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    properties:
+                      meeting:
+                        $ref: '#/components/schemas/Meeting'
+                      meetingType:
+                        $ref: '#/components/schemas/MeetingTypePublicView'
+                    required:
+                      - meeting
+                      - meetingType
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meetings
+  /meetings/{id}:
+    get:
+      operationId: MeetingController_get
+      description: Получить детали встречи (владелец)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Meeting'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meetings
+      security:
+        - BearerAuth: []
+    put:
+      operationId: MeetingController_update
+      description: Обновить встречу (владелец)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Meeting'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meetings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingUpdate'
+      security:
+        - BearerAuth: []
+    delete:
+      operationId: MeetingController_cancel
+      description: Отменить встречу (владелец)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: reason
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Meetings
+      security:
+        - BearerAuth: []
+  /owner/password:
+    put:
+      operationId: OwnerController_changePassword
+      description: Сменить пароль
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                newPassword:
+                  type: string
+              required:
+                - oldPassword
+                - newPassword
+      security:
+        - BearerAuth: []
+  /owner/profile:
+    get:
+      operationId: OwnerController_getProfile
+      description: Получить профиль владельца
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Owner'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Owner
+      security:
+        - BearerAuth: []
+    put:
+      operationId: OwnerController_updateProfile
+      description: Обновить профиль владельца
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Owner'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  $ref: '#/components/schemas/Email'
+                timezone:
+                  type: string
+      security:
+        - BearerAuth: []
+  /slots/available/{calendarId}:
+    get:
+      operationId: TimeSlotController_getAvailable
+      description: Получить доступные слоты для бронирования (гость)
+      parameters:
+        - name: calendarId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: from
+          in: query
+          required: true
+          description: Начальная дата (включительно)
+          schema:
+            $ref: '#/components/schemas/Date'
+          explode: false
+        - name: to
+          in: query
+          required: true
+          description: Конечная дата (включительно)
+          schema:
+            $ref: '#/components/schemas/Date'
+          explode: false
+        - name: durationMinutes
+          in: query
+          required: false
+          description: Требуемая длительность в минутах
+          schema:
+            type: integer
+            format: int32
+            default: 30
+          explode: false
+        - name: intervalMinutes
+          in: query
+          required: false
+          description: Шаг временной сетки в минутах (по умолчанию 5)
+          schema:
+            type: integer
+            format: int32
+            default: 5
+          explode: false
+        - name: meetingTypeId
+          in: query
+          required: false
+          description: ID типа встречи для фильтрации
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: params
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/TimeSlotQuery'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/TimeSlotsByDate'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Time Slots
+  /slots/calendar/{calendarId}:
+    get:
+      operationId: TimeSlotController_getAll
+      description: Получить все слоты календаря (владелец)
+      parameters:
+        - name: calendarId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: from
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Date'
+          explode: false
+        - name: to
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Date'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/TimeSlot'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Time Slots
+      security:
+        - BearerAuth: []
+components:
+  schemas:
+    AuthToken:
+      type: object
+      required:
+        - token
+        - type
+        - expiresAt
+      properties:
+        token:
+          type: string
+        type:
+          type: string
+          enum:
+            - Bearer
+        expiresAt:
+          $ref: '#/components/schemas/DateTime'
+      description: Токен авторизации
+    AvailabilityException:
+      type: object
+      required:
+        - id
+        - calendarId
+        - exceptionDate
+        - exceptionType
+        - createdAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/UUID'
+          readOnly: true
+        calendarId:
+          $ref: '#/components/schemas/UUID'
+        exceptionDate:
+          $ref: '#/components/schemas/Date'
+        exceptionType:
+          type: string
+          enum:
+            - unavailable
+            - custom_hours
+          description: 'Тип исключения: недоступен или кастомное время'
+        customWorkStart:
+          type: string
+          description: Новое рабочее время для кастомных часов
+        customWorkEnd:
+          type: string
+        customSlotDuration:
+          type: integer
+          format: int32
+        reason:
+          type: string
+        createdAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+      description: Исключение из правил доступности
+    AvailabilityExceptionCreate:
+      type: object
+      required:
+        - exceptionDate
+        - exceptionType
+      properties:
+        exceptionDate:
+          $ref: '#/components/schemas/Date'
+        exceptionType:
+          type: string
+          enum:
+            - unavailable
+            - custom_hours
+        customWorkStart:
+          type: string
+        customWorkEnd:
+          type: string
+        customSlotDuration:
+          type: integer
+          format: int32
+        reason:
+          type: string
+    AvailabilityRule:
+      type: object
+      required:
+        - id
+        - calendarId
+        - dayOfWeek
+        - workStart
+        - workEnd
+        - slotDurationMinutes
+        - priority
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/UUID'
+          readOnly: true
+        calendarId:
+          $ref: '#/components/schemas/UUID'
+        dayOfWeek:
+          allOf:
+            - $ref: '#/components/schemas/DayOfWeek'
+          description: День недели (1-7, где 1 - понедельник)
+        workStart:
+          type: string
+          description: Время начала рабочего дня (HH:MM:SS)
+        workEnd:
+          type: string
+          description: Время окончания рабочего дня (HH:MM:SS)
+        slotDurationMinutes:
+          type: integer
+          format: int32
+          description: Длительность слота по умолчанию в минутах
+          default: 30
+        breaks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Break'
+          description: Перерывы в течение дня
+        priority:
+          type: integer
+          format: int32
+          description: Приоритет правила (выше = важнее)
+          default: 0
+        isActive:
+          type: boolean
+          default: true
+          readOnly: true
+        createdAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+        updatedAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+      description: Правило доступности (рабочее время по дням недели)
+    AvailabilityRuleCreate:
+      type: object
+      required:
+        - dayOfWeek
+        - workStart
+        - workEnd
+      properties:
+        dayOfWeek:
+          $ref: '#/components/schemas/DayOfWeek'
+        workStart:
+          type: string
+        workEnd:
+          type: string
+        slotDurationMinutes:
+          type: integer
+          format: int32
+          default: 30
+        breaks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Break'
+        priority:
+          type: integer
+          format: int32
+          default: 0
+        isActive:
+          type: boolean
+          default: true
+      description: Создание/обновление правила доступности
+    BookingTooFarError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+                - BOOKING_TOO_FAR
+            message:
+              type: string
+              enum:
+                - Booking is too far in the future
+            maxDaysAhead:
+              type: integer
+              format: int32
+          required:
+            - code
+            - message
+            - maxDaysAhead
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+    BookingTooSoonError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+                - BOOKING_TOO_SOON
+            message:
+              type: string
+              enum:
+                - Booking violates minimum notice requirement
+            minNoticeMinutes:
+              type: integer
+              format: int32
+          required:
+            - code
+            - message
+            - minNoticeMinutes
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+    Break:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+        end:
+          type: string
+    Calendar:
+      type: object
+      required:
+        - id
+        - ownerId
+        - name
+        - timezone
+        - color
+        - isPublic
+        - minBookingNoticeMinutes
+        - maxBookingDaysAhead
+        - timeSlotInterval
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/UUID'
+          readOnly: true
+        ownerId:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+          default: My Calendar
+        timezone:
+          type: string
+          default: UTC
+        color:
+          allOf:
+            - $ref: '#/components/schemas/HexColor'
+          default: '#0066CC'
+        isPublic:
+          type: boolean
+          default: true
+          readOnly: true
+        minBookingNoticeMinutes:
+          type: integer
+          format: int32
+          default: 60
+          readOnly: true
+        maxBookingDaysAhead:
+          type: integer
+          format: int32
+          default: 14
+          readOnly: true
+        timeSlotInterval:
+          type: integer
+          format: int32
+          default: 5
+          readOnly: true
+        createdAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+        updatedAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+      description: Календарь владельца (один на владельца)
+    ConflictDetectedError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+                - CONFLICT_DETECTED
+            message:
+              type: string
+              enum:
+                - This time conflicts with an existing booking
+            conflictingMeeting:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/UUID'
+                startTime:
+                  $ref: '#/components/schemas/DateTime'
+                endTime:
+                  $ref: '#/components/schemas/DateTime'
+              required:
+                - id
+                - startTime
+                - endTime
+          required:
+            - code
+            - message
+            - conflictingMeeting
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+    Date:
+      type: string
+      description: Дата в формате ISO 8601 (YYYY-MM-DD)
+    DateTime:
+      type: string
+      description: Дата и время в формате ISO 8601 с timezone
+    DayOfWeek:
+      type: number
+      enum:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+      description: День недели (ISO 8601)
+    Email:
+      type: string
+      description: Email адрес
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: string
+          required:
+            - code
+            - message
+      description: Стандартная модель ошибки
+    Guest:
+      type: object
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+        email:
+          $ref: '#/components/schemas/Email'
+      description: Гость (без регистрации)
+    HexColor:
+      type: string
+      description: 'Hex цвет (например, #0066CC)'
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          type: string
+      description: Данные для входа
+    Meeting:
+      type: object
+      required:
+        - id
+        - calendarId
+        - meetingTypeId
+        - organizerId
+        - startTime
+        - endTime
+        - status
+        - title
+        - participants
+        - guestName
+        - guestEmail
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/UUID'
+          readOnly: true
+        calendarId:
+          $ref: '#/components/schemas/UUID'
+        meetingTypeId:
+          type: integer
+          format: int32
+        organizerId:
+          $ref: '#/components/schemas/UUID'
+        startTime:
+          $ref: '#/components/schemas/DateTime'
+        endTime:
+          $ref: '#/components/schemas/DateTime'
+        status:
+          $ref: '#/components/schemas/MeetingStatus'
+        title:
+          type: string
+        description:
+          type: string
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingParticipant'
+          description: Участники встречи
+        guestName:
+          type: string
+          description: Гость, создавший бронирование (первый участник)
+        guestEmail:
+          $ref: '#/components/schemas/Email'
+        createdAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+        updatedAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+        cancelledAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+        cancellationReason:
+          type: string
+      description: Встреча (бронирование)
+    MeetingCreate:
+      type: object
+      required:
+        - calendarId
+        - meetingTypeId
+        - startTime
+        - guestName
+        - guestEmail
+      properties:
+        calendarId:
+          $ref: '#/components/schemas/UUID'
+        meetingTypeId:
+          type: integer
+          format: int32
+        startTime:
+          $ref: '#/components/schemas/DateTime'
+        guestName:
+          type: string
+          description: Гость указывает имя и почту (без регистрации)
+        guestEmail:
+          $ref: '#/components/schemas/Email'
+        notes:
+          type: string
+      description: Создание бронирования (гостем)
+    MeetingListItem:
+      type: object
+      required:
+        - id
+        - meetingTypeId
+        - meetingTypeName
+        - startTime
+        - endTime
+        - status
+        - guestName
+        - guestEmail
+        - durationMinutes
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        meetingTypeId:
+          type: integer
+          format: int32
+        meetingTypeName:
+          type: string
+        startTime:
+          $ref: '#/components/schemas/DateTime'
+        endTime:
+          $ref: '#/components/schemas/DateTime'
+        status:
+          $ref: '#/components/schemas/MeetingStatus'
+        guestName:
+          type: string
+        guestEmail:
+          $ref: '#/components/schemas/Email'
+        durationMinutes:
+          type: integer
+          format: int32
+      description: Публичное представление встречи для списка
+    MeetingParticipant:
+      type: object
+      required:
+        - id
+        - meetingId
+        - name
+        - email
+        - isOrganizer
+        - status
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        meetingId:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        email:
+          $ref: '#/components/schemas/Email'
+        isOrganizer:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - pending
+            - confirmed
+            - declined
+            - tentative
+      description: Участник встречи
+    MeetingQuery:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PaginationParams'
+      description: Параметры запроса списка встреч
+    MeetingStatus:
+      type: string
+      enum:
+        - pending
+        - confirmed
+        - cancelled
+        - completed
+        - no_show
+      description: Статус встречи
+    MeetingType:
+      type: object
+      required:
+        - id
+        - calendarId
+        - name
+        - durationMinutes
+        - color
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+          format: int32
+          readOnly: true
+        calendarId:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+        color:
+          allOf:
+            - $ref: '#/components/schemas/HexColor'
+          default: '#0066CC'
+        isActive:
+          type: boolean
+          default: true
+        bookingUrlPath:
+          type: string
+          description: Публичный путь для бронирования
+        createdAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+        updatedAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+      description: Тип встречи (шаблон)
+    MeetingTypeCreate:
+      type: object
+      required:
+        - name
+        - durationMinutes
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+        color:
+          allOf:
+            - $ref: '#/components/schemas/HexColor'
+          default: '#0066CC'
+        isActive:
+          type: boolean
+          default: true
+    MeetingTypePublicView:
+      type: object
+      required:
+        - id
+        - name
+        - durationMinutes
+        - color
+        - bookingUrlPath
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+        color:
+          $ref: '#/components/schemas/HexColor'
+        bookingUrlPath:
+          type: string
+      description: Публичное представление типа встречи (для гостей)
+    MeetingTypeUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+        color:
+          $ref: '#/components/schemas/HexColor'
+        isActive:
+          type: boolean
+    MeetingUpdate:
+      type: object
+      properties:
+        startTime:
+          $ref: '#/components/schemas/DateTime'
+        endTime:
+          $ref: '#/components/schemas/DateTime'
+        status:
+          $ref: '#/components/schemas/MeetingStatus'
+        title:
+          type: string
+        description:
+          type: string
+        cancellationReason:
+          type: string
+      description: Обновление встречи (только для владельца)
+    OutsideWorkingHoursError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+                - OUTSIDE_WORKING_HOURS
+            message:
+              type: string
+              enum:
+                - Selected time is outside working hours
+            workHours:
+              type: object
+              properties:
+                start:
+                  type: string
+                end:
+                  type: string
+              required:
+                - start
+                - end
+          required:
+            - code
+            - message
+            - workHours
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+    Owner:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - timezone
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/UUID'
+          readOnly: true
+        name:
+          type: string
+        email:
+          $ref: '#/components/schemas/Email'
+        timezone:
+          type: string
+          default: UTC
+          readOnly: true
+        createdAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+        updatedAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+      description: Владелец календаря
+    OwnerRegistration:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          type: string
+      description: Данные для регистрации владельца
+    PaginationParams:
+      type: object
+      description: Пагинация
+    SlotAlreadyBookedError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+                - SLOT_ALREADY_BOOKED
+            message:
+              type: string
+              enum:
+                - This time slot is no longer available
+            suggestedAlternatives:
+              type: array
+              items:
+                $ref: '#/components/schemas/TimeSlot'
+          required:
+            - code
+            - message
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+    SlotStatus:
+      type: string
+      enum:
+        - available
+        - booked
+        - blocked
+        - tentative
+      description: Статус слота
+    TimeSlot:
+      type: object
+      required:
+        - id
+        - calendarId
+        - slotDate
+        - slotStart
+        - slotEnd
+        - status
+        - durationMinutes
+        - isGenerated
+        - createdAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/UUID'
+          readOnly: true
+        calendarId:
+          $ref: '#/components/schemas/UUID'
+        slotDate:
+          $ref: '#/components/schemas/Date'
+        slotStart:
+          $ref: '#/components/schemas/DateTime'
+        slotEnd:
+          $ref: '#/components/schemas/DateTime'
+        status:
+          $ref: '#/components/schemas/SlotStatus'
+        meetingId:
+          allOf:
+            - $ref: '#/components/schemas/UUID'
+          description: ID встречи, если слот забронирован
+        durationMinutes:
+          type: integer
+          format: int32
+          description: Длительность слота в минутах
+        isGenerated:
+          type: boolean
+          description: Является ли слот сгенерированным из правила
+        createdAt:
+          allOf:
+            - $ref: '#/components/schemas/DateTime'
+          readOnly: true
+      description: Временной слот для бронирования
+    TimeSlotQuery:
+      type: object
+      description: Параметры запроса слотов
+    TimeSlotsByDate:
+      type: object
+      required:
+        - date
+        - slots
+      properties:
+        date:
+          $ref: '#/components/schemas/Date'
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeSlot'
+      description: Группировка слотов по дате
+    UUID:
+      type: string
+      description: Уникальный идентификатор
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+servers:
+  - url: http://localhost:8000
+    description: Development API
+    variables: {}
+  - url: https://api.booking-calendar.example.com
+    description: Production API
+    variables: {}
